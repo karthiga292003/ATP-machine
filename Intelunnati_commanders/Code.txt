@@ -1,0 +1,93 @@
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Scanner;
+
+public class ElectricityBillPaymentMachine {
+    // Database to store bill information
+    private static Map<String, Double> billDatabase = new HashMap<>();
+
+    // Initialize bill data
+    static {
+        billDatabase.put("ID001", 100.0);
+        billDatabase.put("ID002", 150.0);
+        billDatabase.put("ID003", 200.0);
+        // Add more bill data as needed
+    }
+
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Welcome to the Electricity Bill Payment Machine!");
+
+        // Initialize previous change amount
+        double previousChange = 0.0;
+
+        // Process multiple bill payments
+        while (true) {
+            // Scan ID
+            System.out.print("Scan your ID: ");
+            String id = scanner.nextLine();
+
+            // Retrieve bill amount from database
+            Double billAmount = billDatabase.get(id);
+
+            if (billAmount != null) {
+                // Subtract previous change from bill amount
+                billAmount -= previousChange;
+
+                // Calculate the total with a service charge
+                double serviceCharge = calculateServiceCharge(billAmount);
+                double totalAmount = billAmount + serviceCharge;
+
+                // Display the total amount to be paid
+                System.out.println("Electricity bill amount: $" + billAmount);
+                System.out.println("Service charge: $" + serviceCharge);
+                System.out.println("Total amount to be paid: $" + totalAmount);
+
+                // Process payment
+                boolean paymentSuccessful = false;
+                while (!paymentSuccessful) {
+                    double paymentAmount = 0.0;
+                    if (previousChange > 0.0) {
+                        System.out.println("Previous change amount: $" + previousChange);
+                        System.out.print("Enter your payment amount (including previous change): ");
+                        paymentAmount = scanner.nextDouble();
+                        paymentAmount += previousChange;
+                    } else {
+                        System.out.print("Enter your payment amount: ");
+                        paymentAmount = scanner.nextDouble();
+                    }
+
+                    if (paymentAmount >= totalAmount) {
+                        double change = paymentAmount - totalAmount;
+                        System.out.println("Payment successful! Your change: $" + change);
+                        previousChange = change; // Set the change amount for the next payment
+                        paymentSuccessful = true;
+                    } else {
+                        System.out.println("Insufficient payment amount. Please try again.");
+                    }
+                }
+            } else {
+                System.out.println("Invalid ID. Please try again.");
+            }
+
+            // Ask if the user wants to continue
+            System.out.print("Do you want to make another payment? (Y/N): ");
+            String choice = scanner.next();
+            if (!choice.equalsIgnoreCase("Y")) {
+                break; // Exit the loop if the user does not want to continue
+            }
+            scanner.nextLine(); // Consume the newline character
+        }
+
+        System.out.println("Payment successful. Thank you!");
+
+        scanner.close();
+    }
+
+    // Method to calculate service charge
+    private static double calculateServiceCharge(double billAmount) {
+        // You can customize the service charge calculation logic here
+        // For example, a flat service charge of $2:
+        return 2.0;
+    }
+}
